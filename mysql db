@@ -1,0 +1,90 @@
+CREATE DATABASE employee;
+USE employee;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    employee_id VARCHAR(255) NOT NULL,
+    department VARCHAR(255) NOT NULL
+);
+
+INSERT INTO users (username, email, employee_id, department) VALUES ('Deepak Kushwah', 'deepak.kushwah@example.com', 'E001', 'Tech');
+INSERT INTO users (username, email, employee_id, department) VALUES ('Abhinav Bhatt', 'abhinav.bhatt@example.com', 'E002', 'Engineering');
+
+
+USE employee;
+SHOW TABLES;
+SELECT * FROM users;
+
+
+ALTER TABLE users
+ADD COLUMN `PAM Number` VARCHAR(255) NOT NULL,
+ADD COLUMN `Mobile Number` VARCHAR(255) NOT NULL;
+
+
+ALTER TABLE users
+CHANGE COLUMN `PAM Number` PAN_Number VARCHAR(255) NOT NULL;
+
+DESCRIBE users;
+
+ALTER TABLE users
+CHANGE COLUMN PAN_Number PAN_Number CHAR(10) NOT NULL;
+CHANGE COLUMN 'Mobile Number' 'Mobile Number' CHAR(10) NOT NULL;
+
+DESCRIBE users;
+
+
+
+UPDATE users
+SET PAN_Number = 'ABCDE1234F', Mobile_Number = '1234567890'
+WHERE username = 'Deepak Kushwah';
+
+UPDATE users
+SET PAN_Number = 'FGHIJ5678K', Mobile_Number = '0987654321'
+WHERE username = 'Abhinav Bhatt';
+
+SELECT * FROM users;
+
+INSERT INTO users (username, email, employee_id, department, PAN_Number, `Mobile_Number`) 
+VALUES ('Faizan Qazi', 'faizan.qazi@example.com', 'E003', 'Internal Audit', 'JHKNH5432K', '89345278v2');
+
+
+
+
+Create the trigger:
+DELIMITER //
+
+CREATE TRIGGER validate_pan_number
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.PAN_Number NOT REGEXP '^[A-Za-z0-9]{10}$' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PAN_Number must be exactly 10 alphanumeric characters';
+    END IF;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE TRIGGER validate_mobile_number_before_insert
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.Mobile_Number NOT REGEXP '^[0-9]{10}$' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Mobile_Number must be exactly 10 numeric characters';
+    END IF;
+END //
+
+CREATE TRIGGER validate_mobile_number_before_update
+BEFORE UPDATE ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.Mobile_Number NOT REGEXP '^[0-9]{10}$' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Mobile_Number must be exactly 10 numeric characters';
+    END IF;
+END //
+
+DELIMITER ;
